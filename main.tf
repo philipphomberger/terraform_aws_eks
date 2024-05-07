@@ -64,9 +64,9 @@ module "eks" {
 
   eks_managed_node_groups = {
     one = {
-      name = "node-group-1"
+      name = var.cluster_np_name
 
-      instance_types = ["t3.small"]
+      instance_types = var.cluster_np_instance_types
 
       min_size     = var.cluster_np_min_size
       max_size     = var.cluster_np_max_size

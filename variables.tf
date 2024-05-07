@@ -16,6 +16,12 @@ variable "cluster_ami_type" {
   default     = "AL2_x86_64"
 }
 
+variable "cluster_np_name" {
+  description = "Node Group Name."
+  type        = string
+  default     = "node-group-1"
+}
+
 variable "cluster_np_min_size" {
   description = "Minimal Nodepool"
   type        = number
@@ -32,6 +38,12 @@ variable "cluster_np_desired_size" {
   description = "Desired Size Nodepool"
   type        = number
   default     = 1
+}
+
+variable "cluster_np_instance_types" {
+  description = "Desired Size Nodepool"
+  type        = list
+  default     = ["t3.small"]
 }
 
 variable "vpc_name" {
