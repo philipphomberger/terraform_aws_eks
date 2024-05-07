@@ -5,6 +5,33 @@ provider "aws" {
   # secret_key = "*****"
 }
 
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      args        = ["eks", "get-token", "--region", "us-east-1", "--cluster-name", var.cluster_name]
+      command     = "aws"
+    }
+  }
+}
+
+# Retrieve EKS cluster configuration
+data "aws_eks_cluster" "cluster" {
+  name = var.cluster_name
+  depends_on = [
+    module.eks
+  ]
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = var.cluster_name
+  depends_on = [
+    module.eks
+  ]
+}
+
 data "aws_availability_zones" "available" {
   filter {
     name   = "opt-in-status"
@@ -73,6 +100,9 @@ module "eks" {
       desired_size = var.cluster_np_desired_size
     }
   }
+  depends_on = [
+    module.vpc
+  ]
 }
 
 
@@ -91,3 +121,30 @@ module "irsa-ebs-csi" {
   role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
 }
+
+resource "helm_release" "nginx_ingress" {
+  name       = "ingress-nginx"
+  repository = "https://charts.bitnami.com/bitnami"
+  chart      = "nginx-ingress-controller"
+  namespace  = "default"
+  depends_on = [
+    module.eks
+  ]
+  }
+
+resource "helm_release" "argo_cd" {
+  name       = "ingress-nginx"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  namespace  = "argocd"
+  version    = "6.7.18"
+  create_namespace = true
+
+  set {
+      name  = "server.ingress.enabled"
+      value = "true"
+    }
+  depends_on = [
+    module.eks
+  ]
+  }

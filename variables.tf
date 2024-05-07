@@ -25,13 +25,13 @@ variable "cluster_np_name" {
 variable "cluster_np_min_size" {
   description = "Minimal Nodepool"
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "cluster_np_max_size" {
   description = "Maximum Nodepool"
   type        = number
-  default     = 3
+  default     = 4
 }
 
 variable "cluster_np_desired_size" {
