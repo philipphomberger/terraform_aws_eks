@@ -33,3 +33,33 @@ variable "cluster_np_desired_size" {
   type        = number
   default     = 1
 }
+
+variable "vpc_name" {
+  description = "VPC Name"
+  type        = string
+  default     = "education-vpc"
+}
+
+variable "vpc_cidr" {
+  description = "CIDR VPC Network"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "vpc_private_subnets" {
+  description = "VPC Privat Subnet"
+  type        = list
+  default     = [
+    "10.0.1.0/24", 
+    "10.0.2.0/24", 
+    "10.0.3.0/24"]
+}
+
+variable "vpc_public_subnets" {
+  description = "VPC Public Subnet"
+  type        = list
+  default     = [
+   "10.0.4.0/24",
+   "10.0.5.0/24", 
+   "10.0.6.0/24"]
+}
