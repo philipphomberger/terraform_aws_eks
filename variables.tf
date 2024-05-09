@@ -31,19 +31,19 @@ variable "cluster_np_min_size" {
 variable "cluster_np_max_size" {
   description = "Maximum Nodepool"
   type        = number
-  default     = 4
+  default     = 8
 }
 
 variable "cluster_np_desired_size" {
   description = "Desired Size Nodepool"
   type        = number
-  default     = 1
+  default     = 8
 }
 
 variable "cluster_np_instance_types" {
   description = "Desired Size Nodepool"
   type        = list
-  default     = ["t3.small"]
+  default     = ["t3.medium"]
 }
 
 variable "vpc_name" {

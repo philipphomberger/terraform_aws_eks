@@ -17,6 +17,17 @@ provider "helm" {
   }
 }
 
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    args        = ["eks", "get-token", "--cluster-name", var.cluster_name]
+    command     = "aws"
+  }
+}
+
+
 # Retrieve EKS cluster configuration
 data "aws_eks_cluster" "cluster" {
   name = var.cluster_name
@@ -100,9 +111,6 @@ module "eks" {
       desired_size = var.cluster_np_desired_size
     }
   }
-  depends_on = [
-    module.vpc
-  ]
 }
 
 
@@ -132,8 +140,17 @@ resource "helm_release" "nginx_ingress" {
   ]
   }
 
+data "kubernetes_service" "nginx_ingress" {
+  metadata {
+    name = "ingress-nginx-nginx-ingress-controller"
+  }
+  depends_on = [
+    helm_release.nginx_ingress
+  ]
+}
+
 resource "helm_release" "argo_cd" {
-  name       = "ingress-nginx"
+  name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   namespace  = "argocd"
@@ -141,10 +158,24 @@ resource "helm_release" "argo_cd" {
   create_namespace = true
 
   set {
-      name  = "server.ingress.enabled"
-      value = "true"
-    }
+    name  = "global.domain"
+    value = data.kubernetes_service.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
+  }
+
+  values = [
+    "${file("values-argus.yaml")}"
+  ]
+
   depends_on = [
-    module.eks
+    helm_release.nginx_ingress
   ]
   }
+
+resource "null_resource" "kubectl" {
+    provisioner "local-exec" {
+        command = "aws eks --region us-east-1 update-kubeconfig --name ${var.cluster_name}"
+    }
+    depends_on = [
+      module.eks
+    ]
+}
