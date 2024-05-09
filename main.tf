@@ -1,3 +1,13 @@
+terraform {
+  cloud {
+    organization = "homberger"
+
+    workspaces {
+      name = "learningaws"
+    }
+  }
+}
+
 provider "aws" {
   region = "us-east-1"
   # Secret Read from ENVS
