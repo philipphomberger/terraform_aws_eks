@@ -1,5 +1,5 @@
 provider "aws" {
-  region     = "us-east-1"
+  region = "us-east-1"
   # Secret Read from ENVS
   # access_key = "******"
   # secret_key = "*****"
@@ -138,7 +138,7 @@ resource "helm_release" "nginx_ingress" {
   depends_on = [
     module.eks
   ]
-  }
+}
 
 data "kubernetes_service" "nginx_ingress" {
   metadata {
@@ -150,11 +150,11 @@ data "kubernetes_service" "nginx_ingress" {
 }
 
 resource "helm_release" "argo_cd" {
-  name       = "argocd"
-  repository = "https://argoproj.github.io/argo-helm"
-  chart      = "argo-cd"
-  namespace  = "argocd"
-  version    = "6.7.18"
+  name             = "argocd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  namespace        = "argocd"
+  version          = "6.7.18"
   create_namespace = true
 
   set {
@@ -169,13 +169,13 @@ resource "helm_release" "argo_cd" {
   depends_on = [
     helm_release.nginx_ingress
   ]
-  }
+}
 
 resource "null_resource" "kubectl" {
-    provisioner "local-exec" {
-        command = "aws eks --region us-east-1 update-kubeconfig --name ${var.cluster_name}"
-    }
-    depends_on = [
-      module.eks
-    ]
+  provisioner "local-exec" {
+    command = "aws eks --region us-east-1 update-kubeconfig --name ${var.cluster_name}"
+  }
+  depends_on = [
+    module.eks
+  ]
 }

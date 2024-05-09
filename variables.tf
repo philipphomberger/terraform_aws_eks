@@ -42,7 +42,7 @@ variable "cluster_np_desired_size" {
 
 variable "cluster_np_instance_types" {
   description = "Desired Size Nodepool"
-  type        = list
+  type        = list(any)
   default     = ["t3.medium"]
 }
 
@@ -60,18 +60,18 @@ variable "vpc_cidr" {
 
 variable "vpc_private_subnets" {
   description = "VPC Privat Subnet"
-  type        = list
-  default     = [
-    "10.0.1.0/24", 
-    "10.0.2.0/24", 
-    "10.0.3.0/24"]
+  type        = list(any)
+  default = [
+    "10.0.1.0/24",
+    "10.0.2.0/24",
+  "10.0.3.0/24"]
 }
 
 variable "vpc_public_subnets" {
   description = "VPC Public Subnet"
-  type        = list
-  default     = [
-   "10.0.4.0/24",
-   "10.0.5.0/24", 
-   "10.0.6.0/24"]
+  type        = list(any)
+  default = [
+    "10.0.4.0/24",
+    "10.0.5.0/24",
+  "10.0.6.0/24"]
 }
