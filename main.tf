@@ -1,18 +1,24 @@
-terraform {
-  cloud {
-    organization = "homberger"
+# terraform {
+#   cloud {
+#     organization = "homberger"
 
-    workspaces {
-      name = "learningaws"
-    }
-  }
-}
+#     workspaces {
+#       name = "learningaws"
+#     }
+#   }
+# }
 
 provider "aws" {
   region = "us-east-1"
   # Secret Read from ENVS
   # access_key = "******"
   # secret_key = "*****"
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
 }
 
 provider "helm" {
@@ -26,17 +32,6 @@ provider "helm" {
     }
   }
 }
-
-provider "kubernetes" {
-  host                   = data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    args        = ["eks", "get-token", "--cluster-name", var.cluster_name]
-    command     = "aws"
-  }
-}
-
 
 # Retrieve EKS cluster configuration
 data "aws_eks_cluster" "cluster" {
@@ -100,6 +95,10 @@ module "eks" {
     aws-ebs-csi-driver = {
       service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
     }
+    amazon-cloudwatch-observability = {
+      most_recent = true
+    }
+
   }
 
   vpc_id     = module.vpc.vpc_id
@@ -187,5 +186,15 @@ resource "null_resource" "kubectl" {
   }
   depends_on = [
     module.eks
+  ]
+}
+
+# 2 Argo Test Application to show working.
+resource "helm_release" "argo_ressourcen" {
+  name       = "my-local-chart"
+  chart      = "./argo_ressourcen"
+
+  depends_on = [
+    helm_release.argo_cd
   ]
 }
